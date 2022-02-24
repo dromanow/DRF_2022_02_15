@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-p5144rmywwpg0+uz_bnrlc_$m!4cy=e^w^0#yb9dheeiru_009
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -109,6 +109,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        # 'rest_framework.renderers.BrowsableAPIRenderer'
+    ]
+}
+
+if DEBUG:
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append('rest_framework.renderers.BrowsableAPIRenderer')
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
