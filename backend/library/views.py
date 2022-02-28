@@ -2,19 +2,24 @@ import io
 
 from django.http import HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import renderer_classes, api_view, action
 from rest_framework.exceptions import ValidationError
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
 from rest_framework.serializers import Serializer, CharField, IntegerField
-from rest_framework.viewsets import ModelViewSet
-from .serializers import AuthorModelSerializer, BookModelSerializer, BioModelSerializer
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
+from rest_framework.mixins import *
+from rest_framework.pagination import LimitOffsetPagination
+from .serializers import AuthorModelSerializer, BookModelSerializer, BioModelSerializer, AuthorSerializer
 from .models import Author, Book, Bio
 
 
 # client -> [url] -> [view] -> [serializer] -> [model]
 
-
-class AuthorViewSet(ModelViewSet):
+class AuthorModelViewSet(ModelViewSet):
     # renderer_classes = [BrowsableAPIRenderer, JSONRenderer]
 
     serializer_class = AuthorModelSerializer
@@ -31,43 +36,66 @@ class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
 
 
-class AuthorSerializer(Serializer):
+class AuthorView(APIView):
+    renderer_classes = [JSONRenderer]
 
-    def update(self, instance, validated_data):
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.birthday_year = validated_data.get('birthday_year', instance.birthday_year)
-        instance.save()
-        return instance
-
-    def create(self, validated_data):
-        author = Author(**validated_data)
-        author.save()
-        return author
-
-    def validate_birthday_year(self, value):
-        if value < 1000:
-            raise ValidationError('Must be gt 1000')
-        return value
-
-    def validate(self, attrs):
-        if attrs['last_name'] == 'Достоеаский' and attrs['birthday_year'] != 1820:
-            raise ValidationError('Must be 1820')
-        return attrs
-
-    first_name = CharField(max_length=64)
-    last_name = CharField(max_length=64)
-    birthday_year = IntegerField()
+    def get(self, request):
+        authors = Author.objects.all()
+        serializer = AuthorSerializer(authors, many=True)
+        return Response(serializer.data)
 
 
-class BioSerializer(Serializer):
-    text = CharField(max_length=64)
-    author = AuthorSerializer()
+class AuthorLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 2
 
 
-class BookSerializer(Serializer):
-    title = CharField(max_length=64)
-    authors = AuthorSerializer(many=True)
+class AuthorViewSet(ListModelMixin, RetrieveModelMixin, UpdateModelMixin, CreateModelMixin, DestroyModelMixin, GenericViewSet):
+    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+    filterset_fields = ['first_name', 'last_name']
+    pagination_class = AuthorLimitOffsetPagination
+
+    # http://127.0.0.1:8000/api/authors/get_author_name/
+
+    @action(detail=False, methods=['GET'])
+    def get_author_name(self, request, pk=None):
+        author = Author.objects.get(pk=1)
+        return Response({'name': str(author)})
+
+    # http://127.0.0.1:8000/api/authors/?first_name=Федор&last_name=Пушкин
+    # def get_queryset(self):
+    #     queryset = Author.objects.all()
+    #     # first_name = None
+    #     # first_name = self.kwargs['first_name']
+    #     first_name = self.request.query_params.get('first_name', None)
+    #     if first_name:
+    #         queryset = queryset.filter(first_name=first_name)
+    #     last_name = self.request.query_params.get('last_name', None)
+    #     if last_name:
+    #         queryset = queryset.filter(last_name=last_name)
+    #     return queryset
+
+
+class AuthorListView(ListAPIView):
+    renderer_classes = [JSONRenderer]
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+
+
+class AuthorRetrieveView(RetrieveAPIView):
+    renderer_classes = [JSONRenderer]
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+
+
+
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
+def author_api_view(request):
+    authors = Author.objects.all()
+    serializer = AuthorSerializer(authors, many=True)
+    return Response(serializer.data)
 
 
 def get_view(request):
