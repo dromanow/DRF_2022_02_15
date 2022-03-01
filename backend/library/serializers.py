@@ -20,7 +20,7 @@ class BookModelSerializer(ModelSerializer):
 
 
 class BioModelSerializer(ModelSerializer):
-    author = AuthorModelSerializer()
+    # author = AuthorModelSerializer()
 
     class Meta:
         model = Bio
