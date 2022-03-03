@@ -13,14 +13,23 @@ from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import *
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly, BasePermission
+
 from .serializers import AuthorModelSerializer, BookModelSerializer, BioModelSerializer, AuthorSerializer
 from .models import Author, Book, Bio
+
+
+class IsSuperAdminUser(BasePermission):
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_superuser)
 
 
 # client -> [url] -> [view] -> [serializer] -> [model]
 
 class AuthorModelViewSet(ModelViewSet):
     # renderer_classes = [BrowsableAPIRenderer, JSONRenderer]
+    permission_classes = [IsSuperAdminUser]
 
     serializer_class = AuthorModelSerializer
     queryset = Author.objects.all()

@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.authtoken.models import Token
 from library.views import *
 
 router = DefaultRouter()
-router.register('authors', AuthorModelViewSet)
+router.register('authors', AuthorViewSet)
 router.register('books', BookViewSet)
 router.register('bios', BioViewSet)
 
@@ -27,6 +29,8 @@ router.register('bios', BioViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api-auth-token/', obtain_auth_token)
     # path('api_get/<str:first_name>/', AuthorViewSet.as_view({'get': 'list'})),
     # path('api_get/<int:pk>/', AuthorViewSet.as_view({'get': 'retrieve'})),
     # path('api_get/', get_view),
