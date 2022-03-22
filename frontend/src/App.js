@@ -4,6 +4,7 @@ import './App.css';
 import AuthorList from './components/AuthorList.js'
 import BookList from './components/BookList.js'
 import AuthorBookList from './components/AuthorBookList.js'
+import LoginForm from './components/LoginForm.js'
 import axios from 'axios'
 import {HashRouter, BrowserRouter, Route, Routes, Link, useLocation, Navigate} from 'react-router-dom'
 
@@ -21,13 +22,16 @@ class App extends React.Component {
         super(props)
         this.state = {
             'authors': [],
-            'books': []
+            'books': [],
+            'token': ''
         }
     }
 
-    componentDidMount() {
+    getData() {
+        let headers = this.getHeader()
+
         axios
-            .get('http://127.0.0.1:8000/api/authors/')
+            .get('http://127.0.0.1:8000/api/authors/', {headers})
             .then(response => {
                 const authors = response.data
 
@@ -35,9 +39,15 @@ class App extends React.Component {
                     'authors': authors
                 })
             })
-            .catch(error => console.log(error))
+            .catch(error => {
+                console.log(error)
+                this.setState({
+                    'authors': []
+                })
+            })
+
         axios
-            .get('http://127.0.0.1:8000/api/books/')
+            .get('http://127.0.0.1:8000/api/books/', {headers})
             .then(response => {
                 const books = response.data
 
@@ -45,9 +55,55 @@ class App extends React.Component {
                     'books': books
                 })
             })
+            .catch(error => {
+                console.log(error)
+                this.setState({
+                    'books': []
+                })
+            })
+    }
+
+    componentDidMount() {
+        let token = localStorage.getItem('token')
+        this.setState({
+            'token': token
+        }, this.getData)
+    }
+
+    isAuth() {
+        return !!this.state.token
+    }
+
+    getHeader() {
+        if (this.isAuth()) {
+            return {
+                'Authorization': 'Token ' + this.state.token
+            }
+        }
+        return {}
+    }
+
+    getToken(login, password) {
+        console.log(login, password)
+        axios
+            .post('http://127.0.0.1:8000/api-auth-token/', {'username': login, 'password': password})
+            .then(response => {
+                const token = response.data.token
+                console.log(token)
+                localStorage.setItem('token', token)
+                this.setState({
+                    'token': token
+                }, this.getData)
+            })
             .catch(error => console.log(error))
     }
-//                        http://localhost:3000/#/books
+
+    logout() {
+        localStorage.setItem('token', '')
+        this.setState({
+            'token': ''
+        }, this.getData)
+    }
 
     render () {
         return (
@@ -56,10 +112,14 @@ class App extends React.Component {
                     <nav>
                         <li><Link to='/'>Authors</Link></li>
                         <li><Link to='/books'>Books</Link></li>
+                        <li>
+                            { this.isAuth() ? <button onClick={()=>this.logout()} >Logout</button> : <Link to='/login'>Login</Link> }
+                        </li>
                     </nav>
                     <Routes>
                         <Route exact path='/' element = {<AuthorList authors={this.state.authors} />} />
                         <Route exact path='/books' element = {<BookList books={this.state.books} />} />
+                        <Route exact path='/login' element = {<LoginForm getToken={(login, password) => this.getToken(login, password)} />} />
                         <Route exact path='/authors' element = {<Navigate to='/' />} />
                         <Route path='/author/:id' element = {<AuthorBookList books={this.state.books} />} />
                         <Route path="*" element = {<NotFound />} />

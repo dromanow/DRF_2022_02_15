@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 from library.views import *
 
 router = DefaultRouter()
-router.register('authors', AuthorViewSet)
+router.register('authors', AuthorModelViewSet)
 router.register('books', BookViewSet)
 router.register('bios', BioViewSet)
 

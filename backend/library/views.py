@@ -29,7 +29,7 @@ class IsSuperAdminUser(BasePermission):
 
 class AuthorModelViewSet(ModelViewSet):
     # renderer_classes = [BrowsableAPIRenderer, JSONRenderer]
-    permission_classes = [IsSuperAdminUser]
+    # permission_classes = [IsSuperAdminUser]
 
     serializer_class = AuthorModelSerializer
     queryset = Author.objects.all()
