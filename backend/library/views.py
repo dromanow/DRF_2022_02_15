@@ -15,7 +15,8 @@ from rest_framework.mixins import *
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly, BasePermission
 
-from .serializers import AuthorModelSerializer, BookModelSerializer, BioModelSerializer, AuthorSerializer
+from .serializers import AuthorModelSerializer, BookModelSerializer, BioModelSerializer, AuthorSerializer, \
+    AuthorModelSerializerV2
 from .models import Author, Book, Bio
 
 
@@ -31,7 +32,13 @@ class AuthorModelViewSet(ModelViewSet):
     # renderer_classes = [BrowsableAPIRenderer, JSONRenderer]
     # permission_classes = [IsSuperAdminUser]
 
-    serializer_class = AuthorModelSerializer
+    # serializer_class = AuthorModelSerializer
+
+    def get_serializer_class(self):
+        if self.request.version == '2.0':
+            return AuthorModelSerializerV2
+        return AuthorModelSerializer
+
     queryset = Author.objects.all()
 
 

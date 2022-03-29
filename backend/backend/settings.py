@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'drf_yasg',
     'corsheaders',
     'django_filters',
     'library'
@@ -110,7 +111,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
+# from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
+# from rest_framework.versioning import AcceptHeaderVersioning, URLPathVersioning, NamespaceVersioning, HostNameVersioning, QueryParameterVersioning
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -123,14 +125,29 @@ REST_FRAMEWORK = {
     # http://127.0.0.1:8000/api/authors/?page=2
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     # 'PAGE_SIZE': 2
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
-    ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated'
+    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-    ]
+    ],
+    # http://127.0.0.1:8000/api/2.0/authors/
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning'
+
+    # http://127.0.0.1:8000/api/v2/authors/
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning'
+
+    # http://v1.test.com/api/authors/
+    # http://v2.test.com/api/authors/
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.HostNameVersioning'
+
+    # http://test.com/api/authors/?version=2.0
+    # 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning'
+
+    # http://test.com/api/authors/
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning'
 }
 
 if DEBUG:
