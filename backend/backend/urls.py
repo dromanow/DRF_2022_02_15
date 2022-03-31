@@ -21,6 +21,7 @@ from rest_framework.authtoken.models import Token
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from library.views import *
+from graphene_django.views import GraphQLView
 
 router = DefaultRouter()
 router.register('authors', AuthorModelViewSet)
@@ -50,6 +51,7 @@ urlpatterns = [
     # path('api/v3/', include('library.urls', namespace='2.1.2')),
     path('api-auth-token/', obtain_auth_token),
     path('swagger/', schema_view.with_ui()),
+    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     re_path(r'^swagger(?P<format>\.json|\.yaml)', schema_view.without_ui())
 
     # path('api_get/<str:first_name>/', AuthorViewSet.as_view({'get': 'list'})),
