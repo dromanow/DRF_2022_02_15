@@ -5,6 +5,7 @@ import AuthorList from './components/AuthorList.js'
 import BookList from './components/BookList.js'
 import AuthorBookList from './components/AuthorBookList.js'
 import LoginForm from './components/LoginForm.js'
+import BookForm from './components/BookForm.js'
 import axios from 'axios'
 import {HashRouter, BrowserRouter, Route, Routes, Link, useLocation, Navigate} from 'react-router-dom'
 
@@ -101,6 +102,35 @@ class App extends React.Component {
             .catch(error => console.log(error))
     }
 
+    newBook(title, authors) {
+        let headers = this.getHeader()
+        console.log(title, authors)
+        axios
+            .post('http://127.0.0.1:8000/api/books/', {'title': title, 'authors': authors}, {headers})
+            .then(response => {
+                this.getData()
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    deleteBook(id) {
+        let headers = this.getHeader()
+        console.log(id)
+        axios
+            .delete(`http://127.0.0.1:8000/api/books/${id}`, {headers})
+            .then(response => {
+                this.setState({
+                    'books': this.state.books.filter((book) => book.id != id)
+                })
+            })
+            .catch(error => {
+                console.log(error)
+            })
+
+    }
+
     logout() {
         localStorage.setItem('token', '')
         this.setState({
@@ -115,13 +145,15 @@ class App extends React.Component {
                     <nav>
                         <li><Link to='/'>Authors</Link></li>
                         <li><Link to='/books'>Books</Link></li>
+                        <li><Link to='/books/create'>New book</Link></li>
                         <li>
                             { this.isAuth() ? <button onClick={()=>this.logout()} >Logout</button> : <Link to='/login'>Login</Link> }
                         </li>
                     </nav>
                     <Routes>
                         <Route exact path='/' element = {<AuthorList authors={this.state.authors} />} />
-                        <Route exact path='/books' element = {<BookList books={this.state.books} />} />
+                        <Route exact path='/books' element = {<BookList books={this.state.books} deleteBook={(id) => this.deleteBook(id)}/>} />
+                        <Route exact path='/books/create' element = {<BookForm authors={this.state.authors} newBook={(title, authors) => this.newBook(title, authors)}/>} />
                         <Route exact path='/login' element = {<LoginForm getToken={(login, password) => this.getToken(login, password)} />} />
                         <Route exact path='/authors' element = {<Navigate to='/' />} />
                         <Route path='/author/:id' element = {<AuthorBookList books={this.state.books} />} />

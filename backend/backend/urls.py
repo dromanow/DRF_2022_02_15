@@ -15,13 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework.authtoken.models import Token
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from library.views import *
 from graphene_django.views import GraphQLView
+from django.views.generic import TemplateView
 
 router = DefaultRouter()
 router.register('authors', AuthorModelViewSet)
@@ -52,7 +52,8 @@ urlpatterns = [
     path('api-auth-token/', obtain_auth_token),
     path('swagger/', schema_view.with_ui()),
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    re_path(r'^swagger(?P<format>\.json|\.yaml)', schema_view.without_ui())
+    re_path(r'^swagger(?P<format>\.json|\.yaml)', schema_view.without_ui()),
+    path('', TemplateView.as_view(template_name='index.html')),
 
     # path('api_get/<str:first_name>/', AuthorViewSet.as_view({'get': 'list'})),
     # path('api_get/<int:pk>/', AuthorViewSet.as_view({'get': 'retrieve'})),

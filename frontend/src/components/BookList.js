@@ -1,4 +1,4 @@
-const BookItem = ({book}) => {
+const BookItem = ({book, deleteBook}) => {
     return (
         <tr>
             <td>
@@ -7,12 +7,15 @@ const BookItem = ({book}) => {
             <td>
                 {book.authors}
             </td>
+            <td>
+                <button onClick={()=>deleteBook(book.id)}>Delete</button>
+            </td>
         </tr>
     )
 }
 
 
-const BookList = ({books}) => {
+const BookList = ({books, deleteBook}) => {
     return (
         <table>
             <th>
@@ -21,7 +24,7 @@ const BookList = ({books}) => {
             <th>
                 Authors
             </th>
-            {books.map((book) => <BookItem book={book} />)}
+            {books.map((book) => <BookItem book={book} deleteBook={deleteBook}/>)}
         </table>
     )
 }
